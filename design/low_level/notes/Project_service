@@ -1,1 +1,0 @@
-this diagram shows how the Project Service enforces tenant isolation and authorization before mutating project state and emits audit events after successful operations.
