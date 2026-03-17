@@ -42,6 +42,11 @@ Core layout:
 - `db/seeds`
   local seed/reset SQL
 
+Project documentation:
+
+- [THREAT_MODEL.md](THREAT_MODEL.md)
+- [SECURE_CODE_REVIEW_CHECKLIST.md](SECURE_CODE_REVIEW_CHECKLIST.md)
+
 ## Security Model
 
 The project uses multiple layers of enforcement instead of relying on a single check.
@@ -64,7 +69,7 @@ If valid, a `SecurityContext` is added to the request context with:
 
 Relevant file:
 
-- [auth.go](/home/raxan/Downloads/coding/internal/middleware/auth.go)
+- [auth.go](internal/middleware/auth.go)
 
 ### 2. Tenant Resolution
 
@@ -81,7 +86,7 @@ If the user is not a member of that tenant, the request is rejected with `403`.
 
 Relevant file:
 
-- [tenant.go](/home/raxan/Downloads/coding/internal/middleware/tenant.go)
+- [tenant.go](internal/middleware/tenant.go)
 
 ### 3. Authorization
 
@@ -102,7 +107,7 @@ Permissions:
 
 Relevant file:
 
-- [authz.go](/home/raxan/Downloads/coding/internal/middleware/authz.go)
+- [authz.go](internal/middleware/authz.go)
 
 ### 4. Database Tenant Isolation with RLS
 
@@ -124,9 +129,9 @@ This provides defense in depth:
 
 Relevant files:
 
-- [002_enable_rls.sql](/home/raxan/Downloads/coding/db/migrations/002_enable_rls.sql)
-- [004_harden_project_role.sql](/home/raxan/Downloads/coding/db/migrations/004_harden_project_role.sql)
-- [tenant_tx.go](/home/raxan/Downloads/coding/internal/database/tenant_tx.go)
+- [002_enable_rls.sql](db/migrations/002_enable_rls.sql)
+- [004_harden_project_role.sql](db/migrations/004_harden_project_role.sql)
+- [tenant_tx.go](internal/database/tenant_tx.go)
 
 ### 5. Audit Logging
 
@@ -156,9 +161,9 @@ That means:
 
 Relevant files:
 
-- [003_add_audit_logs.sql](/home/raxan/Downloads/coding/db/migrations/003_add_audit_logs.sql)
-- [repository.go](/home/raxan/Downloads/coding/internal/audit/repository.go)
-- [service.go](/home/raxan/Downloads/coding/internal/project/service.go)
+- [003_add_audit_logs.sql](db/migrations/003_add_audit_logs.sql)
+- [repository.go](internal/audit/repository.go)
+- [service.go](internal/project/service.go)
 
 ## API Routes
 
@@ -194,7 +199,7 @@ Response:
 
 Relevant file:
 
-- [main.go](/home/raxan/Downloads/coding/cmd/server/main.go)
+- [main.go](cmd/server/main.go)
 
 ## Request Flow
 
@@ -238,10 +243,10 @@ Current schema:
 
 Migration files:
 
-- [001_init.sql](/home/raxan/Downloads/coding/db/migrations/001_init.sql)
-- [002_enable_rls.sql](/home/raxan/Downloads/coding/db/migrations/002_enable_rls.sql)
-- [003_add_audit_logs.sql](/home/raxan/Downloads/coding/db/migrations/003_add_audit_logs.sql)
-- [004_harden_project_role.sql](/home/raxan/Downloads/coding/db/migrations/004_harden_project_role.sql)
+- [001_init.sql](db/migrations/001_init.sql)
+- [002_enable_rls.sql](db/migrations/002_enable_rls.sql)
+- [003_add_audit_logs.sql](db/migrations/003_add_audit_logs.sql)
+- [004_harden_project_role.sql](db/migrations/004_harden_project_role.sql)
 
 ## Local Development
 
@@ -290,7 +295,7 @@ This script:
 
 Relevant file:
 
-- [bootstrap_local_db.sh](/home/raxan/Downloads/coding/bootstrap_local_db.sh)
+- [bootstrap_local_db.sh](bootstrap_local_db.sh)
 
 ### Run the server manually
 
@@ -327,7 +332,7 @@ This script:
 
 Relevant file:
 
-- [run_full_test_cycle.sh](/home/raxan/Downloads/coding/run_full_test_cycle.sh)
+- [run_full_test_cycle.sh](run_full_test_cycle.sh)
 
 ### Optional report output
 
@@ -345,7 +350,7 @@ If the server is already running:
 
 Relevant file:
 
-- [run_endpoint_tests.sh](/home/raxan/Downloads/coding/run_endpoint_tests.sh)
+- [run_endpoint_tests.sh](run_endpoint_tests.sh)
 
 ### Automated Go tests
 
@@ -361,9 +366,9 @@ Current automated coverage includes:
 
 Relevant test files:
 
-- [auth_test.go](/home/raxan/Downloads/coding/internal/middleware/auth_test.go)
-- [authz_test.go](/home/raxan/Downloads/coding/internal/middleware/authz_test.go)
-- [handler_test.go](/home/raxan/Downloads/coding/internal/project/handler_test.go)
+- [auth_test.go](internal/middleware/auth_test.go)
+- [authz_test.go](internal/middleware/authz_test.go)
+- [handler_test.go](internal/project/handler_test.go)
 
 ### Integration tests
 
@@ -385,8 +390,20 @@ Current integration coverage includes:
 
 Relevant files:
 
-- [run_integration_tests.sh](/home/raxan/Downloads/coding/run_integration_tests.sh)
-- [integration_test.go](/home/raxan/Downloads/coding/internal/project/integration_test.go)
+- [run_integration_tests.sh](run_integration_tests.sh)
+- [integration_test.go](internal/project/integration_test.go)
+
+## CI
+
+The repository includes a GitHub Actions workflow:
+
+- [ci.yml](.github/workflows/ci.yml)
+
+Current CI steps:
+
+- `go test ./...`
+- `./run_integration_tests.sh`
+- `govulncheck ./...`
 
 ## Development JWT Helper
 
@@ -398,7 +415,7 @@ go run ./generate.go
 
 Relevant file:
 
-- [generate.go](/home/raxan/Downloads/coding/generate.go)
+- [generate.go](generate.go)
 
 This is for local testing only.
 
@@ -487,17 +504,16 @@ That gives a clean, high-signal audit trail without overcomplicating the read pa
 
 ## Good Next Steps
 
-- add integration tests for RLS and audit logging
-- add a CI pipeline with `go test ./...`
-- add `govulncheck`
-- add a threat model section or separate `THREAT_MODEL.md`
-- add secure code review notes or a security checklist
+- add a threat model update if new features like MinIO or file handling are introduced
+- extend integration coverage to future DB-backed features
+- add a secure code review pass as a repeatable release habit
+- expand CI with formatting/lint checks if needed
 
 ## Threat Model
 
 A dedicated threat model for this project is available here:
 
-- [THREAT_MODEL.md](/home/raxan/Downloads/coding/THREAT_MODEL.md)
+- [THREAT_MODEL.md](THREAT_MODEL.md)
 
 That document covers:
 
@@ -512,7 +528,7 @@ That document covers:
 
 A repo-specific secure review checklist is available here:
 
-- [SECURE_CODE_REVIEW_CHECKLIST.md](/home/raxan/Downloads/coding/SECURE_CODE_REVIEW_CHECKLIST.md)
+- [SECURE_CODE_REVIEW_CHECKLIST.md](SECURE_CODE_REVIEW_CHECKLIST.md)
 
 Use it to review:
 
@@ -522,3 +538,16 @@ Use it to review:
 - migrations and RLS hardening
 - audit logging
 - tests and local scripts
+
+## Interview Talking Points
+
+If you are explaining this project in an interview, the strongest points are:
+
+- JWT auth with issuer/audience/expiry validation
+- multi-tenant access control through memberships
+- RBAC enforced before handler logic
+- PostgreSQL RLS as a database-side tenant isolation layer
+- audit logging written in the same transaction as business mutations
+- repeatable schema evolution using Goose
+- live abuse-case endpoint testing plus automated Go tests
+- integration tests that proved and then hardened RLS behavior
