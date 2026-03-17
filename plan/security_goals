@@ -1,0 +1,114 @@
+PHASE 1 – SECURITY GOALS CHECKLIST:
+1. Identity & Access
+
+ All endpoints require authentication by default
+
+ OAuth2 / OIDC used (no password handling in app)
+
+ Short-lived tokens + revocation support
+
+ RBAC enforced server-side
+
+ Admin actions explicitly gated & logged
+
+ Tenant context resolved server-side (never from client)
+
+2. Multi-Tenancy & Authorization
+
+ Every request is scoped to a tenant
+
+ Every DB table includes tenant_id
+
+ No cross-tenant access possible
+
+ Authorization checked on every state-changing action
+
+ IDOR protections enforced everywhere
+
+3. Data Protection
+
+ TLS for all external & internal traffic
+
+ Encryption at rest for DB & object storage
+
+ Secrets never stored in code or repos
+
+ Sensitive data excluded from logs
+
+ Data collection minimized to necessity
+
+4. Input & Application Logic
+
+ All external input validated
+
+ Strong typing preferred over dynamic parsing
+
+ Safe error handling (no internal leaks)
+
+ Business logic abuse considered & tested
+
+5. Supply Chain & Dependencies
+
+ Dependencies monitored for vulnerabilities
+
+ Vulnerable deps blocked from release
+
+ SBOM generated for every build
+
+ Third-party code tracked and auditable
+
+6.  CI/CD & Build Integrity
+
+ CI pipelines isolated and ephemeral
+
+ Secrets protected from untrusted PRs
+
+ Only trusted branches can release artifacts
+
+ All build artifacts are signed
+
+ Artifact provenance is traceable
+
+7. Infrastructure & Runtime
+
+ Infrastructure defined as code
+
+ Environments isolated (dev / stage / prod)
+
+ Runtime behavior observable
+
+ Unexpected behavior detectable & alerting enabled
+
+8. Logging & Audit
+
+ Auth events logged
+
+ Admin actions logged
+
+ Security events logged
+
+ Logs protected from tampering
+
+ Logs retained for investigation
+
+9. Incident Readiness
+
+ Security incidents detectable
+
+ Credentials/tokens revocable
+
+ Backups exist & are tested
+
+ Incident response steps documented
+
+ Post-incident review planned
+
+10. Governance
+
+ Security rules applied consistently
+
+ Exceptions documented explicitly
+
+ Security controls testable in CI
+
+ Security debt tracked and revisited

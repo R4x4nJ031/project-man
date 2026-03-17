@@ -1,0 +1,283 @@
+SYSTEM OVERVIEW
+
+System: Multi-tenant SaaS backend
+Architecture: Modular monolith (logical services)
+Communication: REST (external), gRPC (internal)
+Storage: PostgreSQL + MinIO
+
+TRUST LEVEL DEFINITIONS
+
+Untrusted → Fully attacker-controlled
+
+Partially Trusted → Validated identity but user-controlled intent
+
+Trusted Internal → Server-controlled logic
+
+Privileged → DB and storage level access
+
+1️⃣ INTERNET → API GATEWAY
+External Entity
+
+User / Browser / API Client
+
+Trust Level: ❌ Untrusted
+
+Data Flow
+
+User sends:
+
+HTTP method
+
+Path
+
+Query parameters
+
+Headers
+
+JWT token
+
+Cookies
+
+JSON body
+
+File stream (if upload)
+
+All fields attacker-controlled.
+
+TRUST BOUNDARY 1
+
+Untrusted Internet → Backend System
+
+At this boundary:
+
+Before:
+
+Identity unknown
+
+Tenant unknown
+
+Role unknown
+
+Intent untrusted
+
+After authentication:
+
+JWT signature validated
+
+user_id extracted
+
+tenant_id resolved server-side
+
+role resolved from DB
+
+request_id generated
+
+Now request becomes:
+
+Partially Trusted (identity trusted, intent not trusted)
+
+2️⃣ API GATEWAY → INTERNAL SERVICES
+Process
+
+API Gateway forwards:
+
+Business request
+
+SecurityContext:
+
+user_id
+
+tenant_id
+
+role
+
+request_id
+
+Trust Level: ⚠️ Partially Trusted
+
+User intent still untrusted.
+
+TRUST BOUNDARY 2
+
+Gateway → Internal Services
+
+At this boundary:
+
+Assumptions:
+
+Identity valid
+
+Tenant resolved correctly
+
+Role accurate
+
+Risk:
+
+Services may over-trust context
+
+Missing authz
+
+Missing tenant scoping
+
+3️⃣ INTERNAL SERVICE → AUTHORIZATION SERVICE (gRPC)
+
+When performing sensitive actions:
+
+Project/File Service sends:
+
+user_id
+
+tenant_id
+
+action
+
+resource_id
+
+AuthZ returns:
+
+Allow / Deny
+
+Trust Level:
+
+Internal communication
+
+Must still validate inputs
+
+TRUST BOUNDARY 3
+
+Service → Service (gRPC)
+
+Risk:
+
+AuthZ skipped
+
+Incorrect action names
+
+Wrong tenant_id forwarded
+
+4️⃣ INTERNAL SERVICE → DATABASE (PostgreSQL)
+
+Project/File/Audit Services query:
+
+SELECT with tenant_id
+
+INSERT with tenant_id
+
+UPDATE with tenant_id
+
+DELETE with tenant_id
+
+Data Types:
+
+Project data
+
+File metadata
+
+Tenant data
+
+Audit logs
+
+Trust Level: 🔒 Privileged
+
+TRUST BOUNDARY 4
+
+Service → Database
+
+Risk:
+
+Missing tenant filter
+
+Injection
+
+Overbroad queries
+
+Data leakage
+
+5️⃣ FILE SERVICE → OBJECT STORAGE (MinIO)
+
+File Service performs:
+
+Upload object
+
+Download object
+
+Delete object
+
+Object key format:
+tenant/{tenant_id}/project/{project_id}/file/{file_id}
+
+Binary only.
+
+Trust Level: 🔒 Privileged
+
+TRUST BOUNDARY 5
+
+Service → Object Storage
+
+Risk:
+
+Path manipulation
+
+Cross-tenant object access
+
+Exposing internal keys
+
+6️⃣ INTERNAL SERVICES → AUDIT SERVICE
+
+After successful state change:
+
+Service sends:
+
+actor_id
+
+tenant_id
+
+action
+
+resource_id
+
+timestamp
+
+request_id
+
+Audit writes append-only record.
+
+Trust Level: 🔐 Trusted Internal
+
+TRUST BOUNDARY 6
+
+Service → Audit Store
+
+Risk:
+
+Missing audit
+
+Tampered audit
+
+Partial logs
+
+7️⃣ BACKEND → OAUTH PROVIDER
+
+During login:
+
+Gateway redirects user to OAuth provider.
+
+Provider returns:
+
+ID token
+
+Access token
+
+Trust Level: 🌍 External Partially Trusted
+
+TRUST BOUNDARY 7
+
+Backend ↔ External Identity Provider
+
+Risk:
+
+Token misuse
+
+Incorrect issuer validation
+
+Accepting unsigned tokens

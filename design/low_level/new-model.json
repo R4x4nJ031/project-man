@@ -1,0 +1,16 @@
+{
+  "version": "2.5.0",
+  "summary": {
+    "title": "api_gateway",
+    "owner": "raxan",
+    "description": "after authenticated the user can upload , view , modify project files",
+    "id": 0
+  },
+  "detail": {
+    "contributors": [],
+    "diagrams": [],
+    "diagramTop": 1,
+    "reviewer": "raxan",
+    "threatTop": 0
+  }
+}

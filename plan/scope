@@ -1,0 +1,76 @@
+1. Actors (User Types)
+
+• End User (Member): Day-to-day tenant user, limited permissions.
+
+• Admin (Tenant Admin): Manages tenant users and settings.
+
+• Developer (API Consumer): Integrates via tenant-scoped API tokens.
+
+• System Admin: Platform-level maintenance and global tenant management.
+
+2. Core Workflows
+
+• Onboarding: Signup -> Create/Join Tenant -> Dashboard.
+
+• Tenant Lifecycle: Configuration -> Invitations -> Active Work -> Deletion.
+
+• API/Dev: Token generation -> Scoped API calls -> Usage logging.
+
+• Admin/Ops: RBAC management, audit log review, and platform health monitoring.
+
+3. Backend Features (The "Surface Area")
+
+• Auth & Identity: Login, Sessions, JWT, Profile management.
+
+• Tenant/RBAC: Isolation logic, Role definitions, Permission checks.
+
+• Resources: CRUD for "Projects" (Tenant-scoped).
+
+• Files: Upload/Download with metadata and resource association.
+
+• Audit: Detailed logging for user activity, admin actions, and API events.
+
+4. Frontend Components
+
+• Auth pages, Tenant Selector, Resource CRUD UI, File Manager, API Token Management, and Audit Feed.
+
+5. Strategy
+
+• Focus: Auth/Authz, Tenant Isolation, RBAC, API/UI Parity, Auditability.
+
+• Excluded: Payments, Messaging, Real-time (to focus on ProdSec).
+
+
+✅ IN SCOPE
+
+Multi-tenant SaaS backend (Go)
+
+OAuth2/OIDC authentication
+
+Tenant isolation & RBAC
+
+REST APIs + internal gRPC
+
+Projects & file management
+
+API tokens for developers
+
+Audit logging
+
+Local CI/CD
+
+Local infra (Docker, k3s/kind, Postgres, MinIO)
+
+❌ OUT OF SCOPE
+
+Payments & billing
+
+Realtime systems
+
+External SaaS integrations
+
+Compliance certifications
+
+Mobile clients
+
+AI/ML features

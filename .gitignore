@@ -1,0 +1,28 @@
+# binaries
+project-man
+*.exe
+*.out
+
+# Go
+/vendor/
+
+# env
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# logs
+*.log
+
+# docker volumes (never commit)
+pgdata/
+minio-data/
+
+# secrets
+.env.local
+.env.production

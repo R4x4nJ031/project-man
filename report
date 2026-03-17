@@ -1,0 +1,303 @@
+🧱 IMPLEMENTATION ROADMAP (Production Style)
+
+We split into 8 Major Stages.
+Each stage builds on the previous.
+
+You do NOT skip stages.
+
+🟢 STAGE 0 — Foundation Setup
+
+Goal: Clean project structure + tooling.
+
+0.1 Initialize project
+
+go mod init
+
+folder structure
+
+internal vs cmd separation
+
+0.2 Add:
+
+structured logging
+
+config loader (env based)
+
+basic HTTP server
+
+graceful shutdown
+
+No security yet. Just clean foundation.
+
+Stage 0.5 — Dockerization Layer (before Auth)
+
+This is where Docker comes in.
+
+You:
+
+Write multi-stage Dockerfile
+
+Add docker-compose
+
+Add postgres + minio containers
+
+Ensure networking is internal
+
+Ensure non-root container
+
+Ensure resource limits
+
+Ensure image scanning works
+
+
+🟢 STAGE 1 — Authentication (AuthN at Gateway)
+
+Goal: Establish identity boundary.
+
+1.1 Define SecurityContext struct
+1.2 Implement JWT validation:
+
+signature check
+
+expiry check
+
+issuer validation
+
+audience validation
+
+1.3 Build Auth middleware:
+
+extract Bearer token
+
+validate
+
+extract user_id
+
+generate request_id
+
+inject SecurityContext
+
+1.4 Reject unauthenticated requests (401)
+
+Invariant enforced:
+
+No request reaches business logic without identity.
+
+🟢 STAGE 2 — Tenant Resolution
+
+Goal: Establish tenant boundary.
+
+2.1 Design user-tenant mapping table
+2.2 Resolve tenant from:
+
+header OR
+
+token claim OR
+
+DB lookup
+
+2.3 Inject tenant_id into SecurityContext
+2.4 Enforce:
+
+If user not member of tenant → 403
+
+Invariant enforced:
+
+Tenant context is server-resolved, never client-trusted.
+
+🟢 STAGE 3 — Authorization Service (AuthZ Core)
+
+Goal: Centralize permission decisions.
+
+3.1 Define action model:
+
+project.create
+
+project.read
+
+project.update
+
+project.delete
+
+3.2 Define role → permissions mapping
+3.3 Implement AuthZ service (in-memory first)
+3.4 Deny by default
+3.5 gRPC optional (later)
+
+Invariant enforced:
+
+No mutation without explicit allow.
+
+🟢 STAGE 4 — Project Service (With Tenant Isolation)
+
+Goal: First real data-backed service.
+
+4.1 Setup PostgreSQL
+4.2 Define schema with tenant_id everywhere
+4.3 Create repository layer:
+
+All queries require tenant_id
+
+No raw SQL in handlers
+
+4.4 Implement:
+
+Create project
+
+Get project
+
+Update project
+
+Delete project
+
+4.5 Insert AuthZ call:
+
+After load, before mutation
+
+4.6 Enforce:
+
+Return 404 for cross-tenant
+
+Invariant enforced:
+
+Tenant isolation + AuthZ before mutation.
+
+🟢 STAGE 5 — Database Hardening (RLS)
+
+Goal: Defense in depth.
+
+5.1 Enable PostgreSQL Row Level Security
+5.2 Define tenant-based policy
+5.3 Set tenant context per request
+5.4 Test bypass attempts
+
+Invariant enforced:
+
+Even if code forgets tenant filter, DB blocks it.
+
+🟢 STAGE 6 — File Service (Object Storage)
+
+Goal: Secure file handling.
+
+6.1 Setup MinIO
+6.2 Design object key format:
+
+tenant/{tenant_id}/project/{project_id}/file/{file_id}
+
+6.3 Enforce:
+
+Server-generated object keys
+
+File size limit
+
+MIME type validation
+
+Streaming upload
+
+6.4 AuthZ before file mutation
+
+Invariant enforced:
+
+File operations scoped to tenant + project.
+
+🟢 STAGE 7 — Audit Service
+
+Goal: Security visibility.
+
+7.1 Create audit table (append-only)
+7.2 Emit audit after successful mutation
+7.3 Include:
+
+actor
+
+tenant
+
+action
+
+resource
+
+request_id
+
+7.4 Protect:
+
+No update/delete on audit table
+
+Invariant enforced:
+
+Every sensitive action is traceable.
+
+🟢 STAGE 8 — CI/CD + Supply Chain Security
+
+Goal: Secure the build system.
+
+8.1 Add:
+
+govulncheck
+
+trivy
+
+dependency pinning
+
+8.2 Block build on vulnerability
+8.3 Secrets via environment only
+8.4 Signed builds (optional advanced)
+
+Invariant enforced:
+
+Build pipeline cannot silently introduce vulnerabilities.
+
+🟢 STAGE 9 — Abuse Case Testing
+
+Goal: Validate threat model.
+
+Manually attempt:
+
+IDOR
+
+Cross-tenant access
+
+Role escalation
+
+Token misuse
+
+Missing authz bypass
+
+Large file upload DoS
+
+Fix what breaks.
+
+🟢 STAGE 10 — Hardening & Observability
+
+Goal: Production readiness mindset.
+
+Rate limiting
+
+Structured logging
+
+Alerting hooks
+
+Security event classification
+
+Metrics per tenant
+
+📌 Order Summary (Simple View)
+
+Foundation
+
+AuthN
+
+Tenant resolution
+
+AuthZ
+
+Project Service
+
+DB Hardening
+
+File Service
+
+Audit
+
+CI/CD
+
+Security testing

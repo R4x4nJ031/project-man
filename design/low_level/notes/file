@@ -1,0 +1,15 @@
+Gateway gives trusted context
+
+File Service validates input
+
+Tenant isolation is enforced via DB
+
+AuthZ is checked BEFORE touching files
+
+Object key is generated internally
+
+Binary goes to MinIO
+
+Metadata goes to Postgres
+
+Audit logs the action

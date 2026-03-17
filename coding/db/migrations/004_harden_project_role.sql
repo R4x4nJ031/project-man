@@ -1,0 +1,5 @@
+-- +goose Up
+ALTER ROLE project NOSUPERUSER NOBYPASSRLS;
+
+-- +goose Down
+ALTER ROLE project SUPERUSER BYPASSRLS;
